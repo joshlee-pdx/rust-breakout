@@ -34,8 +34,8 @@ impl MainState {
             text,
             frames:0,
             };
-    };
         Ok(s)
+    }
 }
 
 impl event::EventHandler for MainState {
@@ -60,7 +60,7 @@ impl event::EventHandler for MainState {
             Ok(())
         }
     }
-    
+
     // Now our main function, which does three things:
     //
     // * First, create a new `ggez::conf::Conf`
