@@ -1,6 +1,6 @@
 # rust-breakout (v 0.0.1)
 ### About
-The classic game Breakout implemented in rust using [GGEZ](https://github.com/ggez/ggez).
+The classic game Breakout implemented in rust using [ggez](https://github.com/ggez/ggez).
 
 ### Authors
 * Josh Lee <<email@pdx.edu>>
