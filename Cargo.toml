@@ -5,3 +5,4 @@ authors = ["Miguel Delapaz", "Josh Lee", "Geoff Maggi"]
 
 [dependencies]
 ggez = "0.4"
+rand = "0.4.2"

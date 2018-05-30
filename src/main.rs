@@ -16,9 +16,21 @@ use ggez::graphics;
 use std::env;
 use std::path;
 
+use std::time::Duration;
+
+const BLOCK: f32 = 32.0;
+
+const WIDTH: u32 = BLOCK as u32 * 25;
+const HEIGHT: u32 = BLOCK as u32 * 20;
+
 // Structure to contain the game's state
 struct MainState {
-    text: graphics::Text,
+    enemies: u32,
+    //lives: i32,
+    //text: graphics::Text,
+    score:u32,
+    score_changed: bool,
+    score_display: graphics::Text,
     frames: usize,
 }
 
@@ -28,10 +40,14 @@ impl MainState {
         // Which will be mounted later, so no need to path it here
 
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf",48)?;
-        let text = graphics::Text::new(ctx, "Hello world!", &font)?;
+        let text = graphics::Text::new(ctx, &"Start", &font)?;
 
         let s = MainState {
-            text,
+            enemies: 0,
+            //lives: 1,
+            score:0,
+            score_changed: true,
+            score_display: text,
             frames:0,
             };
         Ok(s)
@@ -40,27 +56,42 @@ impl MainState {
 
 impl event::EventHandler for MainState {
         fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-            Ok(())
-        }
+            // Check if victory
 
-        fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-            graphics::clear(ctx);
+            //Check Collisions
 
-            // Drawables are drawn from their top-left corner
+            //Run update for objects
 
-            let dest_point = graphics::Point2::new(10.0, 10.0);
-            graphics::draw(ctx, &self.text, dest_point, 0.0)?;
-            graphics::present(ctx);
+            // Update Score
+            if self.score_changed {
+                let font = graphics::Font::new(_ctx, "/DejaVuSerif.ttf", 22)?;
+                //let text_to_display = format!("Score: {} Lives: {}", self.score, self.lives);
+                let text_to_display = format!("Score: {}", self.score);
+                let text = graphics::Text::new(_ctx, &text_to_display, &font)?;
 
-            self.frames += 1;
+                self.score_display = text;
+                self.score_changed = false;
+                }
 
-            if (self.frames % 100) == 0 {
-                println!("FPS: {}", ggez::timer::get_fps(ctx));
-            }
-            Ok(())
-        }
+        Ok(())
     }
 
+    // Draw current mainstate
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        //Clear the screen first
+        graphics::clear(ctx);
+
+        //Tell the paddle and blocks where to draw themselves
+
+        // Check if dead?
+
+        graphics::present(ctx);
+
+        ggez::timer::yield_now();
+
+        Ok(())
+    }
+}
     // Now our main function, which does three things:
     //
     // * First, create a new `ggez::conf::Conf`
@@ -69,21 +100,27 @@ impl event::EventHandler for MainState {
     // * Second, create a `ggez::game::Game` object which will
     // do the work of creating our MainState and running our game.
     // * Then, just call `game.run()` which runs the `Game` mainloop.
-fn main(){
+fn main() {
     // Window settings
     // Game settings
     // Configuration Settings
     let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("helloworld", "ggez", c).unwrap();
+    let ctx = &mut ggez::ContextBuilder::new("breakout", "ggez")
+        .window_setup(ggez::conf::WindowSetup::default().title("Breakout!"))
+        .window_mode(ggez::conf::WindowMode::default().dimensions(HEIGHT, WIDTH))
+        .build().expect("Failed to build ggez context");
+
+    graphics::set_background_color(ctx, [0.0, 0.0, 0.0, 0.0].into());
 
     // We add the CARGO_MANIFEST_DIR/resources to the filesystem's path
     // so that ggez will look in our cargo project directory for files.
 
-    if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+    /*if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
            let mut path = path::PathBuf::from(manifest_dir);
            path.push("resources");
            ctx.filesystem.mount(&path, true);
        }
+    */
 
        let state = &mut MainState::new(ctx).unwrap();
 
@@ -92,6 +129,4 @@ fn main(){
        } else {
            println!("Game exited cleanly.");
        }
-
-
 }
