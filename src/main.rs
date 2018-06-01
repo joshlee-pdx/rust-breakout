@@ -1,8 +1,7 @@
 /*
 Main file for Breakout game using the ggez engine.
 
-NOTE: Initial main file is mostly a copy of the Hello_World example
-from the ggez site.
+TODO: Create Paddle for player, create blocks for enemies, place blocks and paddle
 */
 
 extern crate ggez;
@@ -64,7 +63,7 @@ impl event::EventHandler for MainState {
 
             // Update Score
             if self.score_changed {
-                let font = graphics::Font::new(_ctx, "/DejaVuSerif.ttf", 22)?;
+                let font = graphics::Font::new(_ctx, "/DejaVuSerif.ttf", 18)?;
                 //let text_to_display = format!("Score: {} Lives: {}", self.score, self.lives);
                 let text_to_display = format!("Score: {}", self.score);
                 let text = graphics::Text::new(_ctx, &text_to_display, &font)?;
@@ -81,6 +80,10 @@ impl event::EventHandler for MainState {
         //Clear the screen first
         graphics::clear(ctx);
 
+        // Display score
+        graphics::set_color(ctx, graphics::WHITE)?;
+        let dest_point = graphics::Point2::new(50.0, 20.0);
+        graphics::draw(ctx, &self.score_display, dest_point, 0.0)?;
         //Tell the paddle and blocks where to draw themselves
 
         // Check if dead?

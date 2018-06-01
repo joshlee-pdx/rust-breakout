@@ -3,7 +3,7 @@
 The classic game Breakout implemented in rust using [ggez](https://github.com/ggez/ggez).
 
 ### Authors
-* Josh Lee <<email@pdx.edu>>
+* Josh Lee <<joshulee@pdx.edu>>
 * Geoff Maggi <<gmaggi@pdx.edu>>
 * Miguel Delapaz <<email@pdx.edu>>
 
