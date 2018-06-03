@@ -22,11 +22,111 @@ const BLOCK: f32 = 32.0;
 const WIDTH: u32 = BLOCK as u32 * 25;
 const HEIGHT: u32 = BLOCK as u32 * 20;
 
+/* ======================== WORK IN PROGRESS ======================== */
+// Defining the player, blocks, and ball
+struct Player{
+    x: f32,
+    y: f32,
+    vel_x: f32,
+    moving: bool,
+}
+
+impl Player {
+    fn new(/*_ctx: &mut Context*/) -> Player {
+        Player {
+            x: 400.0
+            y: 10.0,
+            vel_x: 0.0,
+            moving: false,
+        }
+    }
+
+    pub fn draw(/*&mut self, ctx: &mut Context*/) -> GameResult<()> {
+        let rect = graphics::Rect::new(self.x, self.y, 32.0, 100.0);
+        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
+        Ok(())
+    }
+}
+
+struct Ball {
+    x: f32,
+    y: f32,
+    vel_x: f32,
+    vel_y: f32,
+    radius: f32,
+}
+
+impl Ball {
+    fn new(_ctx: &mut Context) -> Ball {
+        let mut rng = rand::thread_rng();
+        let mut vel_x = rng.gen::<f32>();
+        vel_y -= 2.0;
+        let vel_x = rng.gen::<f32>();
+
+        Ball {
+            x: WINDOW_W as f32 / 2.0,
+            y: WINDOW_H as f32 / 2.0,
+            vel_x: vel_x,
+            vel_y: vel_y,
+            radius: 10.0,
+        }
+    }
+
+    pub fn update(&mut self) {
+        // called every frame
+        self.x += self.vel_x;
+        self.y += self.vel_y;
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let dst = Point2::new(self.x, self.y);
+        graphics::circle(ctx, DrawMode::Fill, dst, self.radius, 1.0)?;
+        Ok(())
+    }
+}
+
+struct Block {
+    x: f32,
+    y: f32,
+    visible: bool,
+}
+
+impl Block {
+
+}
+
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+enum Direction {
+    Left,
+    Right,
+}
+
+impl Direction {
+    pub fn from_keycode(key: Keycode) -> Option<Direction> {
+        match key {
+            Keycode::Left => Some(Direction::Left),
+            Keycode::Right => Some(Direction::Right),
+            _ => None
+        }
+    }
+}
+/* ================================================================== */ 
+
 // Structure to contain the game's state
 struct MainState {
-    enemies: u32,
+    //enemies: u32,
     //lives: i32,
     //text: graphics::Text,
+
+    // First we need the player (paddle)
+    player: Player,
+    // Next need the blocks
+    block: Block,
+    // And lastly the ball
+    ball: Ball,
+
+    gameover: bool,
+
     score:u32,
     score_changed: bool,
     score_display: graphics::Text,
@@ -42,8 +142,15 @@ impl MainState {
         let text = graphics::Text::new(ctx, &"Start", &font)?;
 
         let s = MainState {
-            enemies: 0,
+            //enemies: 0,
             //lives: 1,
+
+            player: Player::new(player_pos),
+            block: Block::new(block_pos),
+            ball: Ball::new(ball_pos),
+
+            gameover: false,
+
             score:0,
             score_changed: true,
             score_display: text,
