@@ -1,10 +1,10 @@
 extern crate ggez;
 extern crate rand;
 
-use ggez::{GameResult, Context, ContextBuilder};
-use ggez::graphics::{self, DrawMode, Point2, set_color};
 use ggez::conf;
 use ggez::event;
+use ggez::graphics::{self, set_color, DrawMode, Point2};
+use ggez::{Context, ContextBuilder, GameResult};
 use std::{env, path};
 
 use rand::Rng;
@@ -23,7 +23,7 @@ struct Ball {
 impl Ball {
     fn new(_ctx: &mut Context) -> Ball {
         let mut rng = rand::thread_rng();
-        
+
         let mut vel_x = rng.gen::<f32>(); //This will change based on paddle velocity
         let vel_y = 1.0; //Starting Speed
 
@@ -44,7 +44,7 @@ impl Ball {
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         set_color(ctx, [1.0, 0.0, 0.0, 1.0].into())?;
-        
+
         let loc = Point2::new(self.x, self.y);
         graphics::circle(ctx, DrawMode::Fill, loc, self.radius, 1.0)?;
         Ok(())
@@ -58,11 +58,11 @@ struct MainState {
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let s = MainState {
-          ball: Ball::new(_ctx),
+            ball: Ball::new(_ctx),
         };
         Ok(s)
     }
-    
+
     pub fn collision(&mut self) {
         //Top
         if self.ball.y - self.ball.radius <= 0.0 {
@@ -94,7 +94,7 @@ impl event::EventHandler for MainState {
         graphics::clear(ctx);
 
         self.ball.draw(ctx)?;
-        
+
         graphics::present(ctx);
         Ok(())
     }
