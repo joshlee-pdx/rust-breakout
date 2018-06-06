@@ -23,6 +23,7 @@ const WIDTH: u32 = BLOCK as u32 * 25;
 const HEIGHT: u32 = BLOCK as u32 * 20;
 
 /* ======================== WORK IN PROGRESS ======================== */
+/*
 // Defining the player, blocks, and ball
 struct Player{
     x: f32,
@@ -110,7 +111,8 @@ impl Direction {
         }
     }
 }
-/* ================================================================== */ 
+*/
+/* ================================================================== */
 
 // Structure to contain the game's state
 struct MainState {
@@ -118,14 +120,15 @@ struct MainState {
     //lives: i32,
     //text: graphics::Text,
 
+    // WIP
     // First we need the player (paddle)
-    player: Player,
+    // player: Player,
     // Next need the blocks
-    block: Block,
+    // block: Block,
     // And lastly the ball
-    ball: Ball,
+    // ball: Ball,
 
-    gameover: bool,
+    // gameover: bool,
 
     score:u32,
     score_changed: bool,
@@ -145,11 +148,11 @@ impl MainState {
             //enemies: 0,
             //lives: 1,
 
-            player: Player::new(player_pos),
-            block: Block::new(block_pos),
-            ball: Ball::new(ball_pos),
+            //player: Player::new(player_pos),
+            //block: Block::new(block_pos),
+            //ball: Ball::new(ball_pos),
 
-            gameover: false,
+            // gameover: false,
 
             score:0,
             score_changed: true,
