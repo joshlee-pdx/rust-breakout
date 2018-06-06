@@ -6,7 +6,7 @@ use ggez::event;
 use ggez::event::{Keycode, Mod};
 use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, ContextBuilder, GameResult};
-use std::{env, num, path};
+use std::{env, path};
 
 use rand::Rng;
 
@@ -27,7 +27,7 @@ impl Ball {
     fn new(_ctx: &mut Context) -> Ball {
         let mut rng = rand::thread_rng();
 
-        let mut vel_x = rng.gen::<f32>();
+        let vel_x = rng.gen::<f32>();
         let vel_y = -5.0; //Starting Speed
 
         Ball {
