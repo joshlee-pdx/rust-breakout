@@ -164,13 +164,7 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
-    fn key_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        keycode: Keycode,
-        _keymod: Mod,
-        _repeat: bool,
-    ) {
+    fn key_down_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
         match keycode {
             Keycode::Left | Keycode::A => {
                 self.paddle.move_left();
@@ -178,12 +172,14 @@ impl event::EventHandler for MainState {
             Keycode::Right | Keycode::D => {
                 self.paddle.move_right();
             }
-            Keycode::Escape => _ctx.quit().unwrap(),
+            Keycode::Escape => {
+                _ctx.quit().unwrap();
+            }
             _ => {}
         }
     }
 
-    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
         match keycode {
             Keycode::Left | Keycode::A | Keycode::Right | Keycode::D => {
                 self.paddle.stop();
