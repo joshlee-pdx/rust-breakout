@@ -1,5 +1,3 @@
-//Bouncing ball
-
 extern crate ggez;
 extern crate rand;
 
@@ -8,13 +6,13 @@ use ggez::event;
 use ggez::event::{Keycode, Mod};
 use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, ContextBuilder, GameResult};
-use std::{env, path};
+use std::{env, num, path};
 
 use rand::Rng;
 
 const WINDOW_W: u32 = 400;
 const WINDOW_H: u32 = 600;
-const PADDLE_W: f32 = 80.0;
+const PADDLE_W: f32 = 100.0;
 const PADDLE_H: f32 = 10.0;
 
 struct Ball {
@@ -29,8 +27,8 @@ impl Ball {
     fn new(_ctx: &mut Context) -> Ball {
         let mut rng = rand::thread_rng();
 
-        let mut vel_x = rng.gen::<f32>(); //This will change based on paddle velocity
-        let vel_y = 5.0; //Starting Speed
+        let mut vel_x = rng.gen::<f32>();
+        let vel_y = -5.0; //Starting Speed
 
         Ball {
             x: WINDOW_W as f32 / 2.0,
@@ -65,7 +63,7 @@ struct Paddle {
 impl Paddle {
     fn new(_ctx: &mut Context) -> Paddle {
         Paddle {
-            x: 300.0,
+            x: WINDOW_W as f32 / 2.0 - PADDLE_W / 2.0, //Centered
             vel_x: 0.0,
             moving: false,
         }
@@ -127,12 +125,18 @@ impl MainState {
     }
 
     pub fn collision(&mut self) {
-        //Top
-        if self.ball.y - self.ball.radius <= 0.0 {
+        if self.ball.y + self.ball.radius >= WINDOW_H as f32 - 10.0 - PADDLE_H //top of paddle
+			&& self.ball.x < self.paddle.x + PADDLE_W && self.ball.x > self.paddle.x
+        //hitting paddle
+        {
+            if self.paddle.moving {
+                self.ball.vel_x = self.paddle.vel_x / (2.0 as f32).sqrt();
+            }
             self.ball.vel_y *= -1.0;
         }
-        //Bottom
-        if self.ball.y + self.ball.radius >= WINDOW_H as f32 {
+
+        //Top
+        if self.ball.y - self.ball.radius <= 0.0 {
             self.ball.vel_y *= -1.0;
         }
         //Left
@@ -142,6 +146,11 @@ impl MainState {
         //Right
         if self.ball.x + self.ball.radius > WINDOW_W as f32 {
             self.ball.vel_x *= -1.0;
+        }
+        //Bottom
+        if self.ball.y + self.ball.radius >= WINDOW_H as f32 {
+            self.ball.vel_y = 0.0; //You lost, FIX ME!
+            self.ball.vel_x = 0.0;
         }
     }
 }
