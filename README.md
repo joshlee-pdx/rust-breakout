@@ -13,8 +13,9 @@ The objective of the game is to break all the bricks before running out of lives
 
 ### How to Run
 1. Download the source code
-2. `cargo build` to get dependencies
-3. `cargo run` to play the game
+2. The SDL2 libraries are required.  The best way to install them is documented [by the SDL2 crate](https://github.com/AngryLawyer/rust-sdl2#user-content-requirements).
+3. `cargo build` to get dependencies
+4. `cargo run` to play the game
 ---------------------------------------
 
 CS 410P/510 - RUST Programming Spring 2018  
