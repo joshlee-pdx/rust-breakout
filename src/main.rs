@@ -45,6 +45,11 @@ impl Ball {
         self.y += self.vel_y;
     }
 
+	pub fn reset(&mut self) {
+		self.x = WINDOW_W as f32 / 2.0;
+		self.y = WINDOW_H as f32 / 2.0;
+	}
+	
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         set_color(ctx, [1.0, 0.0, 0.0, 1.0].into())?;
 
@@ -149,8 +154,7 @@ impl MainState {
         }
         //Bottom
         if self.ball.y + self.ball.radius >= WINDOW_H as f32 {
-            self.ball.vel_y = 0.0; //You lost, FIX ME!
-            self.ball.vel_x = 0.0;
+			self.ball.reset();
         }
     }
 }
