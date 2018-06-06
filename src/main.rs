@@ -1,53 +1,19 @@
-/*
-Main file for Breakout game using the ggez engine.
-
-TODO: Create Paddle for player, create blocks for enemies, place blocks and paddle
-*/
-
 extern crate ggez;
+extern crate rand;
 
 use ggez::conf;
 use ggez::event;
-use ggez::{Context, GameResult};
-use ggez::graphics;
-//use ggez::timer;
+use ggez::event::{Keycode, Mod};
+use ggez::graphics::{self, set_color, DrawMode, Point2};
+use ggez::{Context, ContextBuilder, GameResult};
+use std::{env, num, path};
 
-use std::env;
-use std::path;
+use rand::Rng;
 
-use std::time::Duration;
-
-const BLOCK: f32 = 32.0;
-
-const WIDTH: u32 = BLOCK as u32 * 25;
-const HEIGHT: u32 = BLOCK as u32 * 20;
-
-/* ======================== WORK IN PROGRESS ======================== */
-/*
-// Defining the player, blocks, and ball
-struct Player{
-    x: f32,
-    y: f32,
-    vel_x: f32,
-    moving: bool,
-}
-
-impl Player {
-    fn new(/*_ctx: &mut Context*/) -> Player {
-        Player {
-            x: 400.0
-            y: 10.0,
-            vel_x: 0.0,
-            moving: false,
-        }
-    }
-
-    pub fn draw(/*&mut self, ctx: &mut Context*/) -> GameResult<()> {
-        let rect = graphics::Rect::new(self.x, self.y, 32.0, 100.0);
-        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
-        Ok(())
-    }
-}
+const WINDOW_W: u32 = 400;
+const WINDOW_H: u32 = 600;
+const PADDLE_W: f32 = 100.0;
+const PADDLE_H: f32 = 10.0;
 
 struct Ball {
     x: f32,
@@ -60,186 +26,192 @@ struct Ball {
 impl Ball {
     fn new(_ctx: &mut Context) -> Ball {
         let mut rng = rand::thread_rng();
+
         let mut vel_x = rng.gen::<f32>();
-        vel_y -= 2.0;
-        let vel_x = rng.gen::<f32>();
+        let vel_y = -5.0; //Starting Speed
 
         Ball {
             x: WINDOW_W as f32 / 2.0,
             y: WINDOW_H as f32 / 2.0,
             vel_x: vel_x,
             vel_y: vel_y,
-            radius: 10.0,
+            radius: 8.0,
         }
     }
 
+    //The ball moving
     pub fn update(&mut self) {
-        // called every frame
         self.x += self.vel_x;
         self.y += self.vel_y;
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        let dst = Point2::new(self.x, self.y);
-        graphics::circle(ctx, DrawMode::Fill, dst, self.radius, 1.0)?;
+        set_color(ctx, [1.0, 0.0, 0.0, 1.0].into())?;
+
+        let loc = Point2::new(self.x, self.y);
+        graphics::circle(ctx, DrawMode::Fill, loc, self.radius, 1.0)?;
         Ok(())
     }
 }
 
-struct Block {
+struct Paddle {
     x: f32,
-    y: f32,
-    visible: bool,
+    vel_x: f32,
+    moving: bool,
 }
 
-impl Block {
-
-}
-
-#[derive(Clone,Copy,Debug,PartialEq,Eq)]
-enum Direction {
-    Left,
-    Right,
-}
-
-impl Direction {
-    pub fn from_keycode(key: Keycode) -> Option<Direction> {
-        match key {
-            Keycode::Left => Some(Direction::Left),
-            Keycode::Right => Some(Direction::Right),
-            _ => None
+impl Paddle {
+    fn new(_ctx: &mut Context) -> Paddle {
+        Paddle {
+            x: WINDOW_W as f32 / 2.0 - PADDLE_W / 2.0, //Centered
+            vel_x: 0.0,
+            moving: false,
         }
     }
+
+    pub fn update(&mut self) {
+        if self.moving {
+            self.x += self.vel_x;
+        }
+        if self.x <= 0.0 {
+            self.x = 0.0;
+        }
+        if self.x + PADDLE_W >= WINDOW_W as f32 {
+            self.x = WINDOW_W as f32 - PADDLE_W;
+        }
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        set_color(ctx, [1.0, 1.0, 1.0, 1.0].into())?;
+
+        let rect = graphics::Rect::new(
+            self.x,
+            WINDOW_H as f32 - 10.0 - PADDLE_H,
+            PADDLE_W,
+            PADDLE_H,
+        );
+        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
+        Ok(())
+    }
+
+    pub fn move_left(&mut self) {
+        self.vel_x = -10.0;
+        self.moving = true;
+    }
+
+    pub fn move_right(&mut self) {
+        self.vel_x = 10.0;
+        self.moving = true;
+    }
+
+    pub fn stop(&mut self) {
+        self.vel_x = 0.0;
+        self.moving = false;
+    }
 }
-*/
-/* ================================================================== */
 
-// Structure to contain the game's state
 struct MainState {
-    //enemies: u32,
-    //lives: i32,
-    //text: graphics::Text,
-
-    // WIP
-    // First we need the player (paddle)
-    // player: Player,
-    // Next need the blocks
-    // block: Block,
-    // And lastly the ball
-    // ball: Ball,
-
-    // gameover: bool,
-
-    score:u32,
-    score_changed: bool,
-    score_display: graphics::Text,
-    frames: usize,
+    ball: Ball,
+    paddle: Paddle,
 }
 
 impl MainState {
-    fn new (ctx: &mut Context) -> GameResult<MainState> {
-        // The ttf file will be in your resources directory
-        // Which will be mounted later, so no need to path it here
-
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf",48)?;
-        let text = graphics::Text::new(ctx, &"Start", &font)?;
-
+    fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let s = MainState {
-            //enemies: 0,
-            //lives: 1,
-
-            //player: Player::new(player_pos),
-            //block: Block::new(block_pos),
-            //ball: Ball::new(ball_pos),
-
-            // gameover: false,
-
-            score:0,
-            score_changed: true,
-            score_display: text,
-            frames:0,
-            };
+            ball: Ball::new(_ctx),
+            paddle: Paddle::new(_ctx),
+        };
         Ok(s)
+    }
+
+    pub fn collision(&mut self) {
+        if self.ball.y + self.ball.radius >= WINDOW_H as f32 - 10.0 - PADDLE_H //top of paddle
+			&& self.ball.x < self.paddle.x + PADDLE_W && self.ball.x > self.paddle.x
+        //hitting paddle
+        {
+            if self.paddle.moving {
+                self.ball.vel_x = self.paddle.vel_x / (2.0 as f32).sqrt();
+            }
+            self.ball.vel_y *= -1.0;
+        }
+
+        //Top
+        if self.ball.y - self.ball.radius <= 0.0 {
+            self.ball.vel_y *= -1.0;
+        }
+        //Left
+        if self.ball.x - self.ball.radius < 0.0 {
+            self.ball.vel_x *= -1.0;
+        }
+        //Right
+        if self.ball.x + self.ball.radius > WINDOW_W as f32 {
+            self.ball.vel_x *= -1.0;
+        }
+        //Bottom
+        if self.ball.y + self.ball.radius >= WINDOW_H as f32 {
+            self.ball.vel_y = 0.0; //You lost, FIX ME!
+            self.ball.vel_x = 0.0;
+        }
     }
 }
 
 impl event::EventHandler for MainState {
-        fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-            // Check if victory
-
-            //Check Collisions
-
-            //Run update for objects
-
-            // Update Score
-            if self.score_changed {
-                let font = graphics::Font::new(_ctx, "/DejaVuSerif.ttf", 18)?;
-                //let text_to_display = format!("Score: {} Lives: {}", self.score, self.lives);
-                let text_to_display = format!("Score: {}", self.score);
-                let text = graphics::Text::new(_ctx, &text_to_display, &font)?;
-
-                self.score_display = text;
-                self.score_changed = false;
-                }
-
+    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        self.paddle.update();
+        self.ball.update();
+        self.collision();
         Ok(())
     }
 
-    // Draw current mainstate
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        //Clear the screen first
-        graphics::clear(ctx);
+    fn draw(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        graphics::clear(_ctx);
 
-        // Display score
-        graphics::set_color(ctx, graphics::WHITE)?;
-        let dest_point = graphics::Point2::new(50.0, 20.0);
-        graphics::draw(ctx, &self.score_display, dest_point, 0.0)?;
-        //Tell the paddle and blocks where to draw themselves
+        self.paddle.draw(_ctx)?;
+        self.ball.draw(_ctx)?;
 
-        // Check if dead?
-
-        graphics::present(ctx);
-
-        ggez::timer::yield_now();
-
+        graphics::present(_ctx);
         Ok(())
+    }
+
+    fn key_down_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
+        match keycode {
+            Keycode::Left | Keycode::A => {
+                self.paddle.move_left();
+            }
+            Keycode::Right | Keycode::D => {
+                self.paddle.move_right();
+            }
+            Keycode::Escape => {
+                _ctx.quit().unwrap();
+            }
+            _ => {}
+        }
+    }
+
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
+        match keycode {
+            Keycode::Left | Keycode::A | Keycode::Right | Keycode::D => {
+                self.paddle.stop();
+            }
+            _ => {}
+        }
     }
 }
-    // Now our main function, which does three things:
-    //
-    // * First, create a new `ggez::conf::Conf`
-    // object which contains configuration info on things such
-    // as screen resolution and window title.
-    // * Second, create a `ggez::game::Game` object which will
-    // do the work of creating our MainState and running our game.
-    // * Then, just call `game.run()` which runs the `Game` mainloop.
-fn main() {
-    // Window settings
-    // Game settings
-    // Configuration Settings
-    let c = conf::Conf::new();
-    let ctx = &mut ggez::ContextBuilder::new("breakout", "ggez")
-        .window_setup(ggez::conf::WindowSetup::default().title("Breakout!"))
-        .window_mode(ggez::conf::WindowMode::default().dimensions(HEIGHT, WIDTH))
-        .build().expect("Failed to build ggez context");
 
-    graphics::set_background_color(ctx, [0.0, 0.0, 0.0, 0.0].into());
+pub fn main() {
+    let mut cb = ContextBuilder::new("Rust Breakout!", "ggez")
+        .window_setup(conf::WindowSetup::default().title("Breakout!"))
+        .window_mode(conf::WindowMode::default().dimensions(WINDOW_W, WINDOW_H));
 
-    // We add the CARGO_MANIFEST_DIR/resources to the filesystem's path
-    // so that ggez will look in our cargo project directory for files.
+    if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        let mut path = path::PathBuf::from(manifest_dir);
+        path.push("resources/");
+        cb = cb.add_resource_path(path);
+    } else {
+        println!("Not building from cargo?  Ok.");
+    }
 
-    /*if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
-           let mut path = path::PathBuf::from(manifest_dir);
-           path.push("resources");
-           ctx.filesystem.mount(&path, true);
-       }
-    */
-
-       let state = &mut MainState::new(ctx).unwrap();
-
-       if let Err(e) = event::run(ctx, state) {
-           println!("Error encountered: {}", e);
-       } else {
-           println!("Game exited cleanly.");
-       }
+    let ctx = &mut cb.build().unwrap();
+    let state = &mut MainState::new(ctx).unwrap();
+    event::run(ctx, state).unwrap();
 }
