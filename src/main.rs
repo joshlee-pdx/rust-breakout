@@ -39,6 +39,16 @@ impl Ball {
         }
     }
 
+    // reset the ball after loss of life
+    pub fn reset(&mut self) {
+        let mut rng = rand::thread_rng();
+
+        self.x = WINDOW_W as f32 / 2.0;
+        self.y = WINDOW_H as f32 / 2.0;
+        self.vel_x = rng.gen::<f32>();
+        self.vel_y = -5.0;
+    }
+
     //The ball moving
     pub fn update(&mut self) {
         self.x += self.vel_x;
@@ -86,7 +96,7 @@ impl Paddle {
 
         let rect = graphics::Rect::new(
             self.x,
-            WINDOW_H as f32 - 10.0 - PADDLE_H,
+            WINDOW_H as f32 - 40.0 - PADDLE_H,
             PADDLE_W,
             PADDLE_H,
         );
@@ -113,19 +123,37 @@ impl Paddle {
 struct MainState {
     ball: Ball,
     paddle: Paddle,
+    level: i32,
+    score: i32,
+    lives: i32,
+    level_text: graphics::Text,
+    score_text: graphics::Text,
+    lives_text: graphics::Text,
+    font: graphics::Font,
 }
 
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
+        let font_init = graphics::Font::new(_ctx, "/DejaVuSerif.ttf", 18)?;
+        let level_out = graphics::Text::new(_ctx, "level", &font_init)?;
+        let score_out = graphics::Text::new(_ctx, "score", &font_init)?;
+        let lives_out = graphics::Text::new(_ctx, "lives", &font_init)?;
         let s = MainState {
             ball: Ball::new(_ctx),
             paddle: Paddle::new(_ctx),
+            level: 1,
+            score: 0,
+            lives: 3,
+            level_text: level_out,
+            score_text: score_out,
+            lives_text: lives_out,
+            font: font_init,
         };
         Ok(s)
     }
 
     pub fn collision(&mut self) {
-        if self.ball.y + self.ball.radius >= WINDOW_H as f32 - 10.0 - PADDLE_H //top of paddle
+        if self.ball.y + self.ball.radius >= WINDOW_H as f32 - 40.0 - PADDLE_H //top of paddle
 			&& self.ball.x < self.paddle.x + PADDLE_W && self.ball.x > self.paddle.x
         //hitting paddle
         {
@@ -149,9 +177,19 @@ impl MainState {
         }
         //Bottom
         if self.ball.y + self.ball.radius >= WINDOW_H as f32 {
-            self.ball.vel_y = 0.0; //You lost, FIX ME!
-            self.ball.vel_x = 0.0;
+            self.ball.reset();
+            self.lives -= 1;
         }
+    }
+
+    pub fn update_ui(&mut self, _ctx: &mut Context) {
+        let new_score = format!("Score: {}", self.score);
+        let new_level = format!("Level: {}", self.level);
+        let new_lives = format!("Lives: {}", self.lives);
+
+        self.score_text = graphics::Text::new(_ctx, &new_score, &self.font).unwrap();
+        self.level_text = graphics::Text::new(_ctx, &new_level, &self.font).unwrap();
+        self.lives_text = graphics::Text::new(_ctx, &new_lives, &self.font).unwrap();
     }
 }
 
@@ -160,6 +198,7 @@ impl event::EventHandler for MainState {
         self.paddle.update();
         self.ball.update();
         self.collision();
+        self.update_ui(_ctx);
         Ok(())
     }
 
@@ -168,6 +207,16 @@ impl event::EventHandler for MainState {
 
         self.paddle.draw(_ctx)?;
         self.ball.draw(_ctx)?;
+
+        // Draw UI elements
+        let score_pos = graphics::Point2::new(WINDOW_W as f32 - 150.0, 10.0);
+        graphics::draw(_ctx, &self.score_text, score_pos, 0.0)?;
+
+        let level_pos = graphics::Point2::new(10.0, 10.0);
+        graphics::draw(_ctx, &self.level_text, level_pos, 0.0)?;
+
+        let lives_pos = graphics::Point2::new(10.0, WINDOW_H as f32 - 30.0);
+        graphics::draw(_ctx, &self.lives_text, lives_pos, 0.0)?;
 
         graphics::present(_ctx);
         Ok(())
