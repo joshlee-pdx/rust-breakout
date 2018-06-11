@@ -1,8 +1,8 @@
 extern crate rand;
 
-use rand::Rng;
 use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, GameResult};
+use rand::Rng;
 
 const WINDOW_W: u32 = 400;
 const WINDOW_H: u32 = 600;
