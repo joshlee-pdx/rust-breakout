@@ -14,6 +14,8 @@ const WINDOW_W: u32 = 400;
 const WINDOW_H: u32 = 600;
 const PADDLE_W: f32 = 100.0;
 const PADDLE_H: f32 = 10.0;
+const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
+const BLOCK_H: f32 = 20.0;
 
 struct Ball {
     x: f32,
@@ -119,30 +121,42 @@ impl Paddle {
         self.moving = false;
     }
 }
-//WIP
+
+#[derive(Debug)]
 struct Block {
     x: f32,
     y: f32,
-    life: f32,
+    life: i32,
 }
 
 impl Block {
-    fn new(_ctx: &mut Context) -> Block {
+    fn new(_ctx: &mut Context, xpos: f32, ypos: f32, hp: i32) -> Block {
         Block {
-            //x: WINDOW_W as f32 / 2.0,
-            //y: PADDLE_W as f32 / 2.0,
-            //life: 1.0,
+            x: xpos,
+            y: ypos,
+            life: hp,
         }
     }
 
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        set_color(ctx, [1.0, 1.0, 1.0, 1.0].into())?;
+
+        let rect = graphics::Rect::new(
+            self.x,
+            self.y,
+            BLOCK_W,
+            BLOCK_H,
+        );
+        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
+        Ok(())
+    }
 
 }
 
 struct MainState {
     ball: Ball,
     paddle: Paddle,
-    //WIP
-    block: Block,
+    blocks: Vec<Block>,
     level: i32,
     score: i32,
     lives: i32,
@@ -161,7 +175,7 @@ impl MainState {
         let s = MainState {
             ball: Ball::new(_ctx),
             paddle: Paddle::new(_ctx),
-            block: Block::new(_ctx),
+            blocks: Vec::new(),
             level: 1,
             score: 0,
             lives: 3,
@@ -173,10 +187,55 @@ impl MainState {
         Ok(s)
     }
 
+    pub fn set_blocks(&mut self, _ctx: &mut Context) {
+      self.blocks = Vec::new();
+      let mut x = 0.0;
+      let mut y = 80.0;
+
+      for _ in 1..6 {
+          for _ in 0..10 {
+              self.blocks.push(Block::new(_ctx, x, y, self.level));
+              x = x + BLOCK_W;
+          }
+          x = 0.0;
+          y = y + BLOCK_H;
+      }
+    }
+
     pub fn collision(&mut self) {
-        if self.ball.y + self.ball.radius >= WINDOW_H as f32 - 40.0 - PADDLE_H //top of paddle
-			&& self.ball.x < self.paddle.x + PADDLE_W && self.ball.x > self.paddle.x
-        //hitting paddle
+        let ball_top = self.ball.y - self.ball.radius;
+        let ball_bottom = self.ball.y + self.ball.radius;
+        let ball_left = self.ball.x - self.ball.radius;
+        let ball_right = self.ball.x + self.ball.radius;
+
+        for b in &mut self.blocks {
+            if b.life > 0 &&
+               ((ball_top <= b.y + BLOCK_H &&
+                 ball_top >= b.y) ||
+                (ball_bottom >= b.y &&
+                 ball_bottom <= b.y + BLOCK_H)) &&
+               ((ball_left >= b.x &&
+                 ball_left <= b.x + BLOCK_W) ||
+                (ball_right >= b.x &&
+                 ball_right <= b.x + BLOCK_W)) {
+
+                b.life -= 1;
+                if b.life == 0 {
+                    self.score += 1;
+                }
+                self.ball.vel_y *= -1.0;
+
+            }
+        }
+
+        if ((ball_top <= WINDOW_H as f32 - 40.0 &&
+             ball_top >= WINDOW_H as f32 - 40.0 - PADDLE_H) ||
+            (ball_bottom <= WINDOW_H as f32 - 40.0 &&
+             ball_bottom >= WINDOW_H as f32 - 40.0 - PADDLE_H)) &&
+           ((ball_left <= self.paddle.x + PADDLE_W &&
+             ball_left >= self.paddle.x) ||
+            (ball_right <= self.paddle.x + PADDLE_W &&
+             ball_right >= self.paddle.x))     
         {
             if self.paddle.moving {
                 self.ball.vel_x = self.paddle.vel_x / (2.0 as f32).sqrt();
@@ -228,8 +287,12 @@ impl event::EventHandler for MainState {
 
         self.paddle.draw(_ctx)?;
         self.ball.draw(_ctx)?;
-        //WIP
-        self.block.draw(_ctx)?;
+
+        for b in &mut self.blocks {
+            if b.life > 0 {
+                b.draw(_ctx)?;
+            }
+        }
 
         // Draw UI elements
         let score_pos = graphics::Point2::new(WINDOW_W as f32 - 150.0, 10.0);
@@ -285,5 +348,6 @@ pub fn main() {
 
     let ctx = &mut cb.build().unwrap();
     let state = &mut MainState::new(ctx).unwrap();
+    state.set_blocks(ctx);
     event::run(ctx, state).unwrap();
 }
