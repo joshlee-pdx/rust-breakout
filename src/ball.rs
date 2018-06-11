@@ -4,9 +4,6 @@ use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, GameResult};
 use rand::Rng;
 
-const WINDOW_W: u32 = 400;
-const WINDOW_H: u32 = 600;
-
 pub struct Ball {
     pub x: f32,
     pub y: f32,
@@ -23,8 +20,8 @@ impl Ball {
         let vel_y = -5.0; //Starting Speed
 
         Ball {
-            x: WINDOW_W as f32 / 2.0,
-            y: WINDOW_H as f32 / 2.0,
+            x: ::WINDOW_W as f32 / 2.0,
+            y: ::WINDOW_H as f32 / 2.0,
             vel_x: vel_x,
             vel_y: vel_y,
             radius: 8.0,
@@ -35,8 +32,8 @@ impl Ball {
     pub fn reset(&mut self) {
         let mut rng = rand::thread_rng();
 
-        self.x = WINDOW_W as f32 / 2.0;
-        self.y = WINDOW_H as f32 / 2.0;
+        self.x = ::WINDOW_W as f32 / 2.0;
+        self.y = ::WINDOW_H as f32 / 2.0;
         self.vel_x = rng.gen::<f32>();
         self.vel_y = -5.0;
     }

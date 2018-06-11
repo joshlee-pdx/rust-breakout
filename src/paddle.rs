@@ -1,13 +1,6 @@
 use ggez::graphics::{self, set_color, DrawMode};
 use ggez::{Context, GameResult};
 
-const WINDOW_W: u32 = 400;
-const WINDOW_H: u32 = 600;
-
-const PADDLE_W: f32 = 100.0;
-const PADDLE_H: f32 = 10.0;
-const PADDLE_PADDING: f32 = 40.0; //The paddle's spacing from the bottom
-
 pub struct Paddle {
     pub x: f32,
     pub vel_x: f32,
@@ -17,7 +10,7 @@ pub struct Paddle {
 impl Paddle {
     pub fn new(_ctx: &mut Context) -> Paddle {
         Paddle {
-            x: WINDOW_W as f32 / 2.0 - PADDLE_W / 2.0, //Centered
+            x: ::WINDOW_W as f32 / 2.0 - ::PADDLE_W / 2.0, //Centered
             vel_x: 0.0,
             moving: false,
         }
@@ -30,8 +23,8 @@ impl Paddle {
         if self.x <= 0.0 {
             self.x = 0.0;
         }
-        if self.x + PADDLE_W >= WINDOW_W as f32 {
-            self.x = WINDOW_W as f32 - PADDLE_W;
+        if self.x + ::PADDLE_W >= ::WINDOW_W as f32 {
+            self.x = ::WINDOW_W as f32 - ::PADDLE_W;
         }
     }
 
@@ -40,9 +33,9 @@ impl Paddle {
 
         let rect = graphics::Rect::new(
             self.x,
-            WINDOW_H as f32 - PADDLE_PADDING - PADDLE_H,
-            PADDLE_W,
-            PADDLE_H,
+            ::WINDOW_H as f32 - ::PADDLE_PADDING - ::PADDLE_H,
+            ::PADDLE_W,
+            ::PADDLE_H,
         );
         graphics::rectangle(ctx, DrawMode::Fill, rect)?;
         Ok(())

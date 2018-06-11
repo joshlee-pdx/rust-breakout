@@ -1,9 +1,6 @@
 use ggez::graphics::{self, set_color, DrawMode};
 use ggez::{Context, GameResult};
 
-const BLOCK_W: f32 = 40.0;
-const BLOCK_H: f32 = 20.0;
-
 #[derive(Debug)]
 pub struct Block {
     pub x: f32,
@@ -22,7 +19,7 @@ impl Block {
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         set_color(ctx, [0.0, 0.0, 0.0, 1.0].into())?;
-        let mut rect = graphics::Rect::new(self.x, self.y, BLOCK_W, BLOCK_H);
+        let mut rect = graphics::Rect::new(self.x, self.y, ::BLOCK_W, ::BLOCK_H);
         graphics::rectangle(ctx, DrawMode::Fill, rect)?;
 
         //Different shades of red, like a brick wall
@@ -37,7 +34,7 @@ impl Block {
             _ => set_color(ctx, [0.19, 0.05, 0.06, 1.0].into())?,
         }
 
-        rect = graphics::Rect::new(self.x, self.y, BLOCK_W - 1.0, BLOCK_H - 1.0);
+        rect = graphics::Rect::new(self.x, self.y, ::BLOCK_W - 1.0, ::BLOCK_H - 1.0);
         graphics::rectangle(ctx, DrawMode::Fill, rect)?;
         Ok(())
     }
