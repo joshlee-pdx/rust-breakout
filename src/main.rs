@@ -1,14 +1,16 @@
 extern crate ggez;
 extern crate rand;
 
+mod ball;
+mod paddle;
+mod block;
+
 use ggez::conf;
 use ggez::event;
 use ggez::event::{Keycode, Mod};
-use ggez::graphics::{self, set_color, DrawMode, Point2};
+use ggez::graphics::{self};
 use ggez::{Context, ContextBuilder, GameResult};
 use std::{env, path};
-
-use rand::Rng;
 
 const WINDOW_W: u32 = 400;
 const WINDOW_H: u32 = 600;
@@ -17,141 +19,10 @@ const PADDLE_H: f32 = 10.0;
 const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
 
-struct Ball {
-    x: f32,
-    y: f32,
-    vel_x: f32,
-    vel_y: f32,
-    radius: f32,
-}
+use paddle::Paddle;
+use ball::Ball;
+use block::Block;
 
-impl Ball {
-    fn new(_ctx: &mut Context) -> Ball {
-        let mut rng = rand::thread_rng();
-
-        let vel_x = rng.gen::<f32>();
-        let vel_y = -5.0; //Starting Speed
-
-        Ball {
-            x: WINDOW_W as f32 / 2.0,
-            y: WINDOW_H as f32 / 2.0,
-            vel_x: vel_x,
-            vel_y: vel_y,
-            radius: 8.0,
-        }
-    }
-
-    // reset the ball after loss of life
-    pub fn reset(&mut self) {
-        let mut rng = rand::thread_rng();
-
-        self.x = WINDOW_W as f32 / 2.0;
-        self.y = WINDOW_H as f32 / 2.0;
-        self.vel_x = rng.gen::<f32>();
-        self.vel_y = -5.0;
-    }
-
-    //The ball moving
-    pub fn update(&mut self) {
-        self.x += self.vel_x;
-        self.y += self.vel_y;
-    }
-
-    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        set_color(ctx, [1.0, 0.0, 0.0, 1.0].into())?;
-
-        let loc = Point2::new(self.x, self.y);
-        graphics::circle(ctx, DrawMode::Fill, loc, self.radius, 1.0)?;
-        Ok(())
-    }
-}
-
-struct Paddle {
-    x: f32,
-    vel_x: f32,
-    moving: bool,
-}
-
-impl Paddle {
-    fn new(_ctx: &mut Context) -> Paddle {
-        Paddle {
-            x: WINDOW_W as f32 / 2.0 - PADDLE_W / 2.0, //Centered
-            vel_x: 0.0,
-            moving: false,
-        }
-    }
-
-    pub fn update(&mut self) {
-        if self.moving {
-            self.x += self.vel_x;
-        }
-        if self.x <= 0.0 {
-            self.x = 0.0;
-        }
-        if self.x + PADDLE_W >= WINDOW_W as f32 {
-            self.x = WINDOW_W as f32 - PADDLE_W;
-        }
-    }
-
-    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        set_color(ctx, [1.0, 1.0, 1.0, 1.0].into())?;
-
-        let rect = graphics::Rect::new(
-            self.x,
-            WINDOW_H as f32 - 40.0 - PADDLE_H,
-            PADDLE_W,
-            PADDLE_H,
-        );
-        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
-        Ok(())
-    }
-
-    pub fn move_left(&mut self) {
-        self.vel_x = -10.0;
-        self.moving = true;
-    }
-
-    pub fn move_right(&mut self) {
-        self.vel_x = 10.0;
-        self.moving = true;
-    }
-
-    pub fn stop(&mut self) {
-        self.vel_x = 0.0;
-        self.moving = false;
-    }
-}
-
-#[derive(Debug)]
-struct Block {
-    x: f32,
-    y: f32,
-    life: i32,
-}
-
-impl Block {
-    fn new(_ctx: &mut Context, xpos: f32, ypos: f32, hp: i32) -> Block {
-        Block {
-            x: xpos,
-            y: ypos,
-            life: hp,
-        }
-    }
-
-    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        set_color(ctx, [1.0, 1.0, 1.0, 1.0].into())?;
-
-        let rect = graphics::Rect::new(
-            self.x,
-            self.y,
-            BLOCK_W,
-            BLOCK_H,
-        );
-        graphics::rectangle(ctx, DrawMode::Fill, rect)?;
-        Ok(())
-    }
-
-}
 
 struct MainState {
     ball: Ball,
@@ -235,7 +106,7 @@ impl MainState {
            ((ball_left <= self.paddle.x + PADDLE_W &&
              ball_left >= self.paddle.x) ||
             (ball_right <= self.paddle.x + PADDLE_W &&
-             ball_right >= self.paddle.x))     
+             ball_right >= self.paddle.x))
         {
             if self.paddle.moving {
                 self.ball.vel_x = self.paddle.vel_x / (2.0 as f32).sqrt();
