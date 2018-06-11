@@ -119,10 +119,30 @@ impl Paddle {
         self.moving = false;
     }
 }
+//WIP
+struct Block {
+    x: f32,
+    y: f32,
+    life: f32,
+}
+
+impl Block {
+    fn new(_ctx: &mut Context) -> Block {
+        Block {
+            //x: WINDOW_W as f32 / 2.0,
+            //y: PADDLE_W as f32 / 2.0,
+            //life: 1.0,
+        }
+    }
+
+
+}
 
 struct MainState {
     ball: Ball,
     paddle: Paddle,
+    //WIP
+    block: Block,
     level: i32,
     score: i32,
     lives: i32,
@@ -141,6 +161,7 @@ impl MainState {
         let s = MainState {
             ball: Ball::new(_ctx),
             paddle: Paddle::new(_ctx),
+            block: Block::new(_ctx),
             level: 1,
             score: 0,
             lives: 3,
@@ -207,6 +228,8 @@ impl event::EventHandler for MainState {
 
         self.paddle.draw(_ctx)?;
         self.ball.draw(_ctx)?;
+        //WIP
+        self.block.draw(_ctx)?;
 
         // Draw UI elements
         let score_pos = graphics::Point2::new(WINDOW_W as f32 - 150.0, 10.0);
