@@ -3,6 +3,7 @@ extern crate rand;
 
 mod ball;
 mod block;
+mod levels;
 mod paddle;
 
 use ggez::conf;
@@ -19,15 +20,6 @@ const PADDLE_H: f32 = 10.0;
 const PADDLE_PADDING: f32 = 40.0; //The paddle's spacing from the bottom
 const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
-
-const LEVEL1: [[i32; 10]; 6] = [
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-];
 
 use ball::Ball;
 use block::Block;
@@ -74,7 +66,8 @@ impl MainState {
 
         for i in 0..6 {
             for j in 0..10 {
-                self.blocks.push(Block::new(_ctx, x, y, LEVEL1[i][j]));
+                self.blocks
+                    .push(Block::new(_ctx, x, y, levels::LEVELS[2][i][j]));
                 x = x + BLOCK_W;
             }
             x = 0.0;
