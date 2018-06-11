@@ -21,12 +21,12 @@ const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
 
 const LEVEL1: [[i32; 10]; 6] = [
-    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-    [0, 1, 1, 2, 2, 2, 2, 1, 1, 0],
-    [1, 1, 1, 2, 3, 3, 2, 1, 1, 1],
-    [1, 1, 1, 2, 3, 3, 2, 1, 1, 1],
-    [0, 1, 1, 2, 2, 2, 2, 1, 1, 0],
-    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
 ];
 
 use ball::Ball;
@@ -90,17 +90,32 @@ impl MainState {
 
         /***** BLOCK COLLISION *****/
         for b in &mut self.blocks {
-            if b.life > 0
-                && ((ball_top <= b.y + BLOCK_H && ball_top >= b.y)
-                    || (ball_bottom >= b.y && ball_bottom <= b.y + BLOCK_H))
-                && ((ball_left >= b.x && ball_left <= b.x + BLOCK_W)
-                    || (ball_right >= b.x && ball_right <= b.x + BLOCK_W))
-            {
-                b.life -= 1;
-                if b.life == 0 {
-                    self.score += 1;
+            if b.life > 0 {
+                let err_x = 1.5 * self.ball.vel_x.abs();
+                let err_y = 1.5 * self.ball.vel_y.abs();
+
+                /* Top and Bottom*/
+                if ((ball_top <= b.y + BLOCK_H && ball_top + err_y > b.y + BLOCK_H)
+                    || (ball_bottom >= b.y && ball_bottom - err_y < b.y))
+                    && (ball_right - err_x > b.x && ball_left + err_y < b.x + BLOCK_W)
+                {
+                    b.life -= 1;
+                    if b.life == 0 {
+                        self.score += 1;
+                    }
+                    self.ball.vel_y *= -1.0;
                 }
-                self.ball.vel_y *= -1.0;
+                /* Left and Right */
+                else if ((ball_right >= b.x && ball_right - err_x < b.x)
+                    || (ball_left <= b.x + BLOCK_W && ball_left + err_x > b.x + BLOCK_W))
+                    && (ball_bottom + err_y > b.y && ball_top - err_y < b.y + BLOCK_H)
+                {
+                    b.life -= 1;
+                    if b.life == 0 {
+                        self.score += 1;
+                    }
+                    self.ball.vel_x *= -1.0;
+                }
             }
         }
 
@@ -124,12 +139,12 @@ impl MainState {
             self.ball.vel_y *= -1.0;
         }
         //Left
-        if ball_left < 0.0 {
-            self.ball.vel_x *= -1.0;
+        if ball_left <= 0.0 {
+            self.ball.vel_x = self.ball.vel_x.abs();
         }
         //Right
-        if ball_right > WINDOW_W as f32 {
-            self.ball.vel_x *= -1.0;
+        if ball_right >= WINDOW_W as f32 {
+            self.ball.vel_x = self.ball.vel_x.abs() * -1.0;
         }
         //Bottom
         if ball_bottom >= WINDOW_H as f32 {
