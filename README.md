@@ -4,6 +4,8 @@ Our take on the classic game Breakout implemented in rust using [ggez](https://g
 
 The player moves a paddle across the bottom of the screen to keep the ball in play. When the ball collides with a brick the brick takes damage until it is broken. If the ball touches the bottom of the screen the player loses a life. The player wins the level by clearing all bricks from the screen.
 
+![Game Example](https://i.imgur.com/hscyz1c.png)
+
 ### Authors
 * Josh Lee <<joshulee@pdx.edu>>
 * Geoff Maggi <<gmaggi@pdx.edu>>
