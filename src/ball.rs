@@ -4,6 +4,9 @@ use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, GameResult};
 use rand::Rng;
 
+const MAX_VEL_X: f32 = 10.0;
+const MAX_VEL_Y: f32 = 10.0;
+
 pub struct Ball {
     pub x: f32,
     pub y: f32,
@@ -40,6 +43,19 @@ impl Ball {
 
     //The ball moving
     pub fn update(&mut self) {
+        if self.vel_x > MAX_VEL_X {
+            self.vel_x = MAX_VEL_X;
+        }
+        if self.vel_x < -1.0 * MAX_VEL_X {
+            self.vel_x = -1.0 * MAX_VEL_X;
+        }
+        if self.vel_y > MAX_VEL_Y {
+            self.vel_y = MAX_VEL_Y;
+        }
+        if self.vel_y < -1.0 * MAX_VEL_Y {
+            self.vel_y = -1.0 * MAX_VEL_Y;
+        }
+
         self.x += self.vel_x;
         self.y += self.vel_y;
     }

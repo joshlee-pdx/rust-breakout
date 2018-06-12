@@ -76,6 +76,9 @@ impl MainState {
     }
 
     pub fn collision(&mut self) {
+        let err_x = 1.5 * self.ball.vel_x.abs();
+        let err_y = 1.5 * self.ball.vel_y.abs();
+
         let ball_top = self.ball.y - self.ball.radius;
         let ball_bottom = self.ball.y + self.ball.radius;
         let ball_left = self.ball.x - self.ball.radius;
@@ -84,9 +87,6 @@ impl MainState {
         /***** BLOCK COLLISION *****/
         for b in &mut self.blocks {
             if b.life > 0 {
-                let err_x = 1.5 * self.ball.vel_x.abs();
-                let err_y = 1.5 * self.ball.vel_y.abs();
-
                 /* Top and Bottom*/
                 if ((ball_top <= b.y + BLOCK_H && ball_top + err_y > b.y + BLOCK_H)
                     || (ball_bottom >= b.y && ball_bottom - err_y < b.y))
@@ -113,17 +113,15 @@ impl MainState {
         }
 
         /***** PADDLE COLLISION *****/
-        if ((ball_top <= WINDOW_H as f32 - PADDLE_PADDING
-            && ball_top >= WINDOW_H as f32 - PADDLE_PADDING - PADDLE_H)
-            || (ball_bottom <= WINDOW_H as f32 - PADDLE_PADDING
-                && ball_bottom >= WINDOW_H as f32 - PADDLE_PADDING - PADDLE_H))
+        if (ball_bottom <= WINDOW_H as f32 - PADDLE_PADDING
+            && ball_bottom + err_y >= WINDOW_H as f32 - PADDLE_PADDING)
             && ((ball_left <= self.paddle.x + PADDLE_W && ball_left >= self.paddle.x)
                 || (ball_right <= self.paddle.x + PADDLE_W && ball_right >= self.paddle.x))
         {
             if self.paddle.moving {
                 self.ball.vel_x += self.paddle.vel_x / (2.0 as f32).sqrt();
             }
-            self.ball.vel_y *= -1.0;
+            self.ball.vel_y *= -1.05; //Every hit makes it 5% faster
         }
 
         /***** EDGE COLLISION *****/
