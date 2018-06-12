@@ -1,11 +1,25 @@
+/*
+CS410P/CS510P
+Term Project
+Written by Josh Lee, Geoff Maggi, and Miguel Delapaz
+
+This is the main file for the classic Breakout Game,
+where the player controls a paddle and moves it left and right to
+bounce a ball off of it in order to break all of the blocks on
+the screen.
+*/
+
+// Import the crates needed for the game Breakout
 extern crate ggez;
 extern crate rand;
 
+// Additional Files to be used to run the game
 mod ball;
 mod block;
 mod levels;
 mod paddle;
 
+// Use specific parts of the ggez and std crates
 use ggez::conf;
 use ggez::event;
 use ggez::event::{Keycode, Mod};
@@ -13,6 +27,12 @@ use ggez::graphics::{clear, draw, present, set_color, Font, Point2, Text};
 use ggez::{Context, ContextBuilder, GameResult};
 use std::{env, path};
 
+// Needed to use specific parts of the ball, block and paddle files
+use ball::Ball;
+use block::Block;
+use paddle::Paddle;
+
+// Global constants to help with object sizes and calculating collision
 const WINDOW_W: u32 = 400;
 const WINDOW_H: u32 = 600;
 const PADDLE_W: f32 = 100.0;
@@ -22,10 +42,8 @@ const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
 const NUMBER_OF_LEVELS: i32 = 5;
 
-use ball::Ball;
-use block::Block;
-use paddle::Paddle;
-
+// The heart of the game, as it will implement the event handler and will
+// control everything that happens in the game
 struct MainState {
     ball: Ball,
     paddle: Paddle,
@@ -41,6 +59,7 @@ struct MainState {
 }
 
 impl MainState {
+    // Function to set up the intitial state of the game
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let font_init = Font::new(_ctx, "/DejaVuSerif.ttf", 18)?;
         let level_out = Text::new(_ctx, "level", &font_init)?;
@@ -62,6 +81,7 @@ impl MainState {
         Ok(s)
     }
 
+    // Function to lay the blocks the player will get to break
     pub fn set_blocks(&mut self, _ctx: &mut Context) {
         self.blocks = Vec::new();
         let mut x = 0.0;
@@ -82,6 +102,8 @@ impl MainState {
         }
     }
 
+    // Function to calculate collision based on how the ball
+    // hits the paddle, blocks, or edges of the window
     pub fn collision(&mut self) {
         let err_x = 1.5 * self.ball.vel_x.abs();
         let err_y = 1.5 * self.ball.vel_y.abs();
@@ -151,6 +173,7 @@ impl MainState {
         }
     }
 
+    // Function to update the score, level, or amount of lives left
     pub fn update_ui(&mut self, _ctx: &mut Context) {
         let new_score = format!("Score: {}", self.score);
         let new_level = format!("Level: {}", self.level);
@@ -161,6 +184,7 @@ impl MainState {
         self.lives_text = Text::new(_ctx, &new_lives, &self.font).unwrap();
     }
 
+    // Function to check if the player lost or won
     pub fn check_end_conditions(&mut self, _ctx: &mut Context) {
         // Out of lives?
         if self.lives == 0 {
@@ -188,7 +212,11 @@ impl MainState {
     }
 }
 
+// Event Handler for the main state which provides an interface
+// that ggez will call automatically when different events happen
 impl event::EventHandler for MainState {
+    // Update will happen on every frame before it is drawn and
+    // the mainstate will react to whatever is happening in the game
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         if !self.game_over {
             self.paddle.update();
@@ -200,9 +228,11 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
+    // Function to render the game's current state
     fn draw(&mut self, _ctx: &mut Context) -> GameResult<()> {
         clear(_ctx);
 
+        // Check if it is game over
         if self.game_over {
             set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; //White
             let text_pos = Point2::new(WINDOW_W as f32 / 3.0, WINDOW_H as f32 / 2.0);
@@ -237,6 +267,7 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
+    // This function is invoked every time a key gets pressed
     fn key_down_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
         match keycode {
             Keycode::Left | Keycode::A => {
@@ -252,6 +283,7 @@ impl event::EventHandler for MainState {
         }
     }
 
+    // This function is invoked every time a key is released
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _: Mod, _: bool) {
         match keycode {
             Keycode::Left | Keycode::A | Keycode::Right | Keycode::D => {
@@ -263,10 +295,12 @@ impl event::EventHandler for MainState {
 }
 
 pub fn main() {
+    // Create a Contextbuilder to setup the metadata about the game
     let mut cb = ContextBuilder::new("Rust Breakout!", "ggez")
         .window_setup(conf::WindowSetup::default().title("Breakout!"))
         .window_mode(conf::WindowMode::default().dimensions(WINDOW_W, WINDOW_H));
 
+    // Directs the program to where the resources are
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources/");
@@ -274,7 +308,8 @@ pub fn main() {
     } else {
         println!("Not building from cargo?  Ok.");
     }
-
+    
+    // Create new instance of the mainstate struct that will run the game
     let ctx = &mut cb.build().unwrap();
     let state = &mut MainState::new(ctx).unwrap();
     state.set_blocks(ctx);
