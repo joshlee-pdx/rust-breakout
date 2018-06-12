@@ -20,7 +20,7 @@ const PADDLE_H: f32 = 10.0;
 const PADDLE_PADDING: f32 = 40.0; //The paddle's spacing from the bottom
 const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
-const NUMBER_OF_LEVELS: i32 = 4;
+const NUMBER_OF_LEVELS: i32 = 5;
 
 use ball::Ball;
 use block::Block;
