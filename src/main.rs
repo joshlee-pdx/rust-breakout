@@ -69,8 +69,12 @@ impl MainState {
 
         for i in 0..6 {
             for j in 0..10 {
-                self.blocks
-                    .push(Block::new(_ctx, x, y, levels::LEVELS[self.level as usize][i][j]));
+                self.blocks.push(Block::new(
+                    _ctx,
+                    x,
+                    y,
+                    levels::LEVELS[self.level as usize][i][j],
+                ));
                 x = x + BLOCK_W;
             }
             x = 0.0;
@@ -157,7 +161,7 @@ impl MainState {
         self.lives_text = Text::new(_ctx, &new_lives, &self.font).unwrap();
     }
 
-    pub fn check_end_conditions(&mut self, _ctx: &mut Context){
+    pub fn check_end_conditions(&mut self, _ctx: &mut Context) {
         // Out of lives?
         if self.lives == 0 {
             self.game_over = true;
@@ -173,14 +177,13 @@ impl MainState {
             }
         }
         if blocks_gone {
-          self.level += 1;
-          if self.level > NUMBER_OF_LEVELS {
-              self.game_over = true;
-          }
-          else {
-              self.ball.reset();
-              self.set_blocks(_ctx);
-          }
+            self.level += 1;
+            if self.level > NUMBER_OF_LEVELS {
+                self.game_over = true;
+            } else {
+                self.ball.reset();
+                self.set_blocks(_ctx);
+            }
         }
     }
 }
@@ -208,8 +211,7 @@ impl event::EventHandler for MainState {
             let score_pos = Point2::new(WINDOW_W as f32 / 3.0, (WINDOW_H as f32 / 2.0) + 40.0);
             draw(_ctx, &self.score_text, score_pos, 0.0)?;
             present(_ctx);
-        }
-        else {
+        } else {
             self.paddle.draw(_ctx)?;
             self.ball.draw(_ctx)?;
 
