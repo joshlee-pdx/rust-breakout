@@ -20,7 +20,7 @@ const PADDLE_H: f32 = 10.0;
 const PADDLE_PADDING: f32 = 40.0; //The paddle's spacing from the bottom
 const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
-const NUMBER_OF_LEVELS: i32 = 3;
+const NUMBER_OF_LEVELS: i32 = 4;
 
 use ball::Ball;
 use block::Block;
@@ -128,7 +128,7 @@ impl MainState {
             if self.paddle.moving {
                 self.ball.vel_x += self.paddle.vel_x / (2.0 as f32).sqrt();
             }
-            self.ball.vel_y *= -1.05; //Every hit makes it 5% faster
+            self.ball.vel_y *= -1.10; //Every hit makes it 10% faster
         }
 
         /***** EDGE COLLISION *****/
