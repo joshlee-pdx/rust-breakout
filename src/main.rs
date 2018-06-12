@@ -20,6 +20,7 @@ const PADDLE_H: f32 = 10.0;
 const PADDLE_PADDING: f32 = 40.0; //The paddle's spacing from the bottom
 const BLOCK_W: f32 = WINDOW_W as f32 / 10.0;
 const BLOCK_H: f32 = 20.0;
+const NUMBER_OF_LEVELS: i32 = 3;
 
 use ball::Ball;
 use block::Block;
@@ -35,6 +36,7 @@ struct MainState {
     level_text: Text,
     score_text: Text,
     lives_text: Text,
+    game_over: bool,
     font: Font,
 }
 
@@ -54,6 +56,7 @@ impl MainState {
             level_text: level_out,
             score_text: score_out,
             lives_text: lives_out,
+            game_over: false,
             font: font_init,
         };
         Ok(s)
@@ -67,7 +70,7 @@ impl MainState {
         for i in 0..6 {
             for j in 0..10 {
                 self.blocks
-                    .push(Block::new(_ctx, x, y, levels::LEVELS[2][i][j]));
+                    .push(Block::new(_ctx, x, y, levels::LEVELS[self.level as usize][i][j]));
                 x = x + BLOCK_W;
             }
             x = 0.0;
@@ -153,41 +156,82 @@ impl MainState {
         self.level_text = Text::new(_ctx, &new_level, &self.font).unwrap();
         self.lives_text = Text::new(_ctx, &new_lives, &self.font).unwrap();
     }
+
+    pub fn check_end_conditions(&mut self, _ctx: &mut Context){
+        // Out of lives?
+        if self.lives == 0 {
+            self.game_over = true;
+            return;
+        }
+
+        // Level Done?
+        let mut blocks_gone = true;
+        for b in &mut self.blocks {
+            if b.life > 0 {
+                blocks_gone = false;
+                break;
+            }
+        }
+        if blocks_gone {
+          self.level += 1;
+          if self.level > NUMBER_OF_LEVELS {
+              self.game_over = true;
+          }
+          else {
+              self.ball.reset();
+              self.set_blocks(_ctx);
+          }
+        }
+    }
 }
 
 impl event::EventHandler for MainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        self.paddle.update();
-        self.ball.update();
-        self.collision();
-        self.update_ui(_ctx);
+        if !self.game_over {
+            self.paddle.update();
+            self.ball.update();
+            self.collision();
+            self.check_end_conditions(_ctx);
+            self.update_ui(_ctx);
+        }
         Ok(())
     }
 
     fn draw(&mut self, _ctx: &mut Context) -> GameResult<()> {
         clear(_ctx);
 
-        self.paddle.draw(_ctx)?;
-        self.ball.draw(_ctx)?;
-
-        for b in &mut self.blocks {
-            if b.life > 0 {
-                b.draw(_ctx)?;
-            }
+        if self.game_over {
+            set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; //White
+            let text_pos = Point2::new(WINDOW_W as f32 / 3.0, WINDOW_H as f32 / 2.0);
+            let go_text = Text::new(_ctx, "GAME OVER", &self.font).unwrap();
+            draw(_ctx, &go_text, text_pos, 0.0)?;
+            let score_pos = Point2::new(WINDOW_W as f32 / 3.0, (WINDOW_H as f32 / 2.0) + 40.0);
+            draw(_ctx, &self.score_text, score_pos, 0.0)?;
+            present(_ctx);
         }
+        else {
+            self.paddle.draw(_ctx)?;
+            self.ball.draw(_ctx)?;
 
-        // Draw UI elements
-        set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; //White
-        let score_pos = Point2::new(WINDOW_W as f32 - 150.0, 10.0);
-        draw(_ctx, &self.score_text, score_pos, 0.0)?;
+            for b in &mut self.blocks {
+                if b.life > 0 {
+                    b.draw(_ctx)?;
+                }
+            }
 
-        let level_pos = Point2::new(10.0, 10.0);
-        draw(_ctx, &self.level_text, level_pos, 0.0)?;
+            // Draw UI elements
+            set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; //White
+            let score_pos = Point2::new(WINDOW_W as f32 - 150.0, 10.0);
+            draw(_ctx, &self.score_text, score_pos, 0.0)?;
 
-        let lives_pos = Point2::new(10.0, WINDOW_H as f32 - 30.0);
-        draw(_ctx, &self.lives_text, lives_pos, 0.0)?;
+            let level_pos = Point2::new(10.0, 10.0);
+            draw(_ctx, &self.level_text, level_pos, 0.0)?;
 
-        present(_ctx);
+            let lives_pos = Point2::new(10.0, WINDOW_H as f32 - 30.0);
+            draw(_ctx, &self.lives_text, lives_pos, 0.0)?;
+
+            present(_ctx);
+        }
         Ok(())
     }
 
