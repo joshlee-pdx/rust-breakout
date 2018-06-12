@@ -4,7 +4,7 @@ use ggez::graphics::{self, set_color, DrawMode, Point2};
 use ggez::{Context, GameResult};
 use rand::Rng;
 
-const MAX_VEL_X: f32 = 10.0;
+const MAX_VEL_X: f32 = 15.0;
 const MAX_VEL_Y: f32 = 10.0;
 
 pub struct Ball {

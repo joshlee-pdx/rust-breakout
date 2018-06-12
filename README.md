@@ -1,4 +1,4 @@
-# rust-breakout (v 0.1.1)
+# rust-breakout (v 1.0.0)
 ### About
 Our take on the classic game Breakout implemented in rust using [ggez](https://github.com/ggez/ggez).
 
