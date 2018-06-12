@@ -1,6 +1,11 @@
+// This is the paddle.rs file for the classic game Breakout,
+// which is responsible for defining the paddle the player controls
+
+// Use specific parts of the ggez crate
 use ggez::graphics::{self, set_color, DrawMode};
 use ggez::{Context, GameResult};
 
+// Struct to define the state of the paddle in the game
 pub struct Paddle {
     pub x: f32,
     pub vel_x: f32,
@@ -8,6 +13,7 @@ pub struct Paddle {
 }
 
 impl Paddle {
+    // Function to setup the initial state of the paddle in the game
     pub fn new(_ctx: &mut Context) -> Paddle {
         Paddle {
             x: ::WINDOW_W as f32 / 2.0 - ::PADDLE_W / 2.0, //Centered
@@ -16,6 +22,7 @@ impl Paddle {
         }
     }
 
+    // Function to update the paddle which is called every time we update the main state
     pub fn update(&mut self) {
         if self.moving {
             self.x += self.vel_x;
@@ -28,6 +35,7 @@ impl Paddle {
         }
     }
 
+    // Function to render the paddle in the game
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         set_color(ctx, [1.0, 1.0, 1.0, 1.0].into())?;
 
@@ -41,6 +49,7 @@ impl Paddle {
         Ok(())
     }
 
+    // Functions to move or stop the paddle
     pub fn move_left(&mut self) {
         self.vel_x = -10.0;
         self.moving = true;

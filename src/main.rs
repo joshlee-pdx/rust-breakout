@@ -3,7 +3,7 @@ CS410P/CS510P
 Term Project
 Written by Josh Lee, Geoff Maggi, and Miguel Delapaz
 
-This is the main file for the classic Breakout Game,
+This is the main file for the classic game Breakout,
 where the player controls a paddle and moves it left and right to
 bounce a ball off of it in order to break all of the blocks on
 the screen.
@@ -116,7 +116,7 @@ impl MainState {
         /***** BLOCK COLLISION *****/
         for b in &mut self.blocks {
             if b.life > 0 {
-                /* Top and Bottom*/
+                /* Top and Bottom */
                 if ((ball_top <= b.y + BLOCK_H && ball_top + err_y > b.y + BLOCK_H)
                     || (ball_bottom >= b.y && ball_bottom - err_y < b.y))
                     && (ball_right - err_x > b.x && ball_left + err_y < b.x + BLOCK_W)
@@ -150,23 +150,23 @@ impl MainState {
             if self.paddle.moving {
                 self.ball.vel_x += self.paddle.vel_x / (2.0 as f32).sqrt();
             }
-            self.ball.vel_y *= -1.10; //Every hit makes it 10% faster
+            self.ball.vel_y *= -1.10; // Every hit makes it 10% faster
         }
 
         /***** EDGE COLLISION *****/
-        //Top
+        // Top
         if ball_top <= 0.0 {
             self.ball.vel_y *= -1.0;
         }
-        //Left
+        // Left
         if ball_left <= 0.0 {
             self.ball.vel_x = self.ball.vel_x.abs();
         }
-        //Right
+        // Right
         if ball_right >= WINDOW_W as f32 {
             self.ball.vel_x = self.ball.vel_x.abs() * -1.0;
         }
-        //Bottom
+        // Bottom
         if ball_bottom >= WINDOW_H as f32 {
             self.ball.reset();
             self.lives -= 1;
@@ -234,7 +234,7 @@ impl event::EventHandler for MainState {
 
         // Check if it is game over
         if self.game_over {
-            set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; //White
+            set_color(_ctx, [1.0, 1.0, 1.0, 1.0].into())?; // White
             let text_pos = Point2::new(WINDOW_W as f32 / 3.0, WINDOW_H as f32 / 2.0);
             let go_text = Text::new(_ctx, "GAME OVER", &self.font).unwrap();
             draw(_ctx, &go_text, text_pos, 0.0)?;
@@ -308,7 +308,7 @@ pub fn main() {
     } else {
         println!("Not building from cargo?  Ok.");
     }
-    
+
     // Create new instance of the mainstate struct that will run the game
     let ctx = &mut cb.build().unwrap();
     let state = &mut MainState::new(ctx).unwrap();
