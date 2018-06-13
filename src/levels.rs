@@ -1,7 +1,6 @@
 // This is the level.rs file for the classic game Breakout,
 // which is responsible for defining the levels in the game
 
-
 pub const LEVELS: [[[i32; 10]; 6]; ::NUMBER_OF_LEVELS as usize + 1] = [
     [
         // Level 0 -- Debug
